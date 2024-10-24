@@ -40,7 +40,8 @@ CallbackReturn XSHardwareInterface::on_init(const hardware_interface::HardwareIn
 {
   info_ = info;
 
-  nh = std::make_shared<rclcpp::Node>("xs_hardware_interface");
+  node_name = info_.hardware_parameters["node_name"];
+  nh = std::make_shared<rclcpp::Node>(node_name);
   executor = std::make_shared<rclcpp::executors::MultiThreadedExecutor>();
   executor->add_node(nh);
 

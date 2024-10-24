@@ -140,6 +140,7 @@ protected:
   // Parameters from the ros2_control tag
   HardwareInfo info_;
 
+  std::string node_name;
   // Name of the arm group, populated by the info_ HardwareInfo
   std::string group_name;
 
