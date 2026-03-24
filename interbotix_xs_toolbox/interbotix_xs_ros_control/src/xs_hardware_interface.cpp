@@ -176,6 +176,11 @@ std::vector<hardware_interface::StateInterface> XSHardwareInterface::export_stat
         info_.joints[i].name,
         hardware_interface::HW_IF_VELOCITY,
         &joint_velocities[i]));
+    state_interfaces.emplace_back(
+      hardware_interface::StateInterface(
+        info_.joints[i].name,
+        hardware_interface::HW_IF_EFFORT,
+        &joint_efforts[i]));
   }
   return state_interfaces;
 }
@@ -197,6 +202,12 @@ return_type XSHardwareInterface::read(const rclcpp::Time &, const rclcpp::Durati
   std::lock_guard<std::mutex> lck(joint_state_mtx_);
   for (size_t i = 0; i < num_joints; i++) {
     joint_positions.at(i) = joint_states.position.at(joint_state_indices.at(i));
+    if (i < joint_states.velocity.size()) {
+      joint_velocities.at(i) = joint_states.velocity.at(joint_state_indices.at(i));
+    }
+    if (i < joint_states.effort.size()) {
+      joint_efforts.at(i) = joint_states.effort.at(joint_state_indices.at(i));
+    }
   }
   return return_type::OK;
 }
