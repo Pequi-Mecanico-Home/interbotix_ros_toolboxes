@@ -85,14 +85,14 @@ CallbackReturn XSHardwareInterface::on_init(const hardware_interface::HardwareIn
   executor->spin_until_future_complete(group_future);
   executor->spin_until_future_complete(gripper_future);
   auto group_res = group_future.get();
-  num_joints = group_res->num_joints;
+  num_joints = group_res->num_joints;  //num_joits -> just the arm group 
   joint_state_indices = group_res->joint_state_indices;
   auto grip_res = gripper_future.get();
   joint_state_indices.push_back(grip_res->joint_state_indices.at(0));
 
   // Get robot joint names from service response, configure vectors
   std::vector<std::string> joint_names = group_res->joint_names;
-  joint_names.push_back(grip_res->joint_names.at(0));
+  joint_names.push_back(grip_res->joint_names.at(0)); // joint_names -> arm and gripper
   joint_positions.resize(num_joints);
   joint_velocities.resize(num_joints);
   joint_efforts.resize(num_joints);
@@ -176,6 +176,11 @@ std::vector<hardware_interface::StateInterface> XSHardwareInterface::export_stat
         info_.joints[i].name,
         hardware_interface::HW_IF_VELOCITY,
         &joint_velocities[i]));
+    state_interfaces.emplace_back(
+      hardware_interface::StateInterface(
+        info_.joints[i].name,
+        hardware_interface::HW_IF_EFFORT,
+        &joint_velocities[i]));
   }
   return state_interfaces;
 }
@@ -195,7 +200,7 @@ std::vector<hardware_interface::CommandInterface> XSHardwareInterface::export_co
 return_type XSHardwareInterface::read(const rclcpp::Time &, const rclcpp::Duration &)
 {
   std::lock_guard<std::mutex> lck(joint_state_mtx_);
-  for (size_t i = 0; i < num_joints; i++) {
+  for (size_t i = 0; i < info_.joints.size(); i++) {
     joint_positions.at(i) = joint_states.position.at(joint_state_indices.at(i));
   }
   return return_type::OK;
