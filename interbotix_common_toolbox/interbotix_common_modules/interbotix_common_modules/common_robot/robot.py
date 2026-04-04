@@ -35,6 +35,7 @@ from typing import Optional
 from interbotix_common_modules.common_robot.exceptions import InterbotixException
 import rclpy
 from rclpy.duration import Duration
+from rclpy.executors import MultiThreadedExecutor
 from rclpy.node import Node
 from rclpy.task import Future
 
@@ -94,7 +95,9 @@ def __start(node: InterbotixRobotNode, daemon: bool = True) -> None:
     global __interbotix_is_up
     __interbotix_is_up = True
     global __interbotix_execution_thread
-    __interbotix_execution_thread = Thread(target=rclpy.spin, args=(node,), daemon=daemon)
+    executor = MultiThreadedExecutor()
+    executor.add_node(node)
+    __interbotix_execution_thread = Thread(target=executor.spin, daemon=daemon)
     __interbotix_execution_thread.start()
 
 
